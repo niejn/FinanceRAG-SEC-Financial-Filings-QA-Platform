@@ -44,6 +44,7 @@ def get_llm(
             model=name.replace("openai/", ""),
             temperature=temperature,
             max_tokens=max_tokens,
+            base_url=config.openai_base_url,
         )
 
     return _cls(

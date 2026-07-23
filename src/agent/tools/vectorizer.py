@@ -79,7 +79,11 @@ def _build_client_and_model() -> tuple[AsyncOpenAI, str] | tuple[None, None]:
         )
     if api_type == "openai":
         return (
-            AsyncOpenAI(api_key=config.openai_api_key, timeout=120.0),
+            AsyncOpenAI(
+                api_key=config.openai_api_key,
+                base_url=config.openai_base_url,
+                timeout=120.0,
+            ),
             (config.openai_embedding_model or "text-embedding-3-small").strip(),
         )
     return None, None

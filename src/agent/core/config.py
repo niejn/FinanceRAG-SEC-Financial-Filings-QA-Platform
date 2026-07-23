@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 from dotenv import load_dotenv
+from loguru import logger
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -17,13 +18,18 @@ _possible_env_paths = [
 ]
 
 _env_loaded = False
+_loaded_env_path = None
 for env_path in _possible_env_paths:
     if env_path.exists():
         load_dotenv(env_path, override=True)
         _env_loaded = True
+        _loaded_env_path = env_path
         break
 if not _env_loaded:
     load_dotenv()
+    logger.warning("未找到 .env 文件，仅使用系统环境变量")
+else:
+    logger.info("已加载 .env: {}", _loaded_env_path)
 
 
 class Config(BaseSettings):
@@ -36,6 +42,7 @@ class Config(BaseSettings):
     )
 
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
+    openai_base_url: Optional[str] = Field(default=None, env="OPENAI_BASE_URL")
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     deepseek_api_key: Optional[str] = Field(default=None, env="DEEPSEEK_API_KEY")
     qwen_api_key: Optional[str] = Field(default=None, env="QWEN_API_KEY")
