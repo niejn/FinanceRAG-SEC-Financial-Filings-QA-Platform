@@ -42,6 +42,7 @@ The system is organized into the following layers (from the knowledge graph):
 
 - **Node-centric RAG** — Ingestion builds a **section tree** from EDGAR HTML; **leaf nodes are chunks**. Retrieval can hit section nodes and expand to leaf descendants for narrative questions. Nodes live in Postgres (`rag_documents`, `rag_nodes`).
 - **Dual indexing** — Dense vectors in **Qdrant** (`rag_nodes` collection) + sparse index in **Postgres full-text or OpenSearch**. Combined via **Reciprocal Rank Fusion (RRF)**.
+- **Node storage details** — See [`NODE_STORAGE_AND_RETRIEVAL.md`](NODE_STORAGE_AND_RETRIEVAL.md) for the `level`/`parent_id` tree, ID alignment, embedding inputs, and PostgreSQL/Qdrant responsibilities.
 - **Finance routing** — A question is classified as needing **SQL evidence** (quantitative, e.g. "revenue in 2024") vs **RAG** (narrative, e.g. business description), using **rule-first keyword matching with LLM fallback** (`question_router.py` → `finance_intent.py`).
 - **SQL evidence narrowing** — When SQL routing is chosen, XBRL-tagged facts are queried from `sec_financial_observations`, and RAG hits are **re-ranked by matching accessions/metrics** (`sql_evidence_narrowing.py`).
 - **Hybrid context assembly** — Top seeds expanded with **sibling expansion** and **char-budget truncation** (`CONTEXT_CHAR_BUDGET`), with optional title-match guarantees for `narrative_targets`.
@@ -169,4 +170,3 @@ Approach these carefully — they carry the highest complexity:
 - **`langfuse_tracing.py` / `report_store.py`** *(complex)* — Observability plumbing with fallback paths.
 - **`page.tsx`** *(complex)* — Rich frontend state: report history, multi-select deletion, i18n following answer locale.
 - **`bocha_search.py` / `part_time_graduate_leads.py`** *(complex)* — Leads extraction with nesting normalization.
-

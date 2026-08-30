@@ -380,7 +380,14 @@ async def _store_nodes(
     ingest_run_id: str,
     nodes: list[NodeRecord],
 ) -> tuple[int, str | None]:
-    """Persist nodes to Postgres + Qdrant + OpenSearch. Returns (vectorized_count, error)."""
+    """Persist nodes to Postgres + Qdrant + OpenSearch.
+
+    PostgreSQL receives the canonical full node records first.  Each node's
+    ``text`` is embedded independently; IDs, ``parent_id``, ``level``, and
+    metadata are payload/index fields, not embedding input.  A normal ingest
+    creates fresh UUIDs upstream, while vector reindexing reads existing
+    PostgreSQL nodes and therefore reuses their IDs.
+    """
     await replace_document_nodes(document_id, ingest_run_id, nodes)
     index_records = [_node_index_record(item) for item in nodes]
     embeddings = await generate_embeddings_batch([item.text for item in nodes])
